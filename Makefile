@@ -59,7 +59,7 @@ GIT_VERSION_LONG := $(shell git describe --always --tags --long --dirty)
 # Docker Variables
 # -----------------------------------------------------------------------------
 
-DOCKER_IMAGE_NAME ?= bryannice/terraform-azure:1.2.0
+DOCKER_IMAGE_NAME ?= bryannice/terraform-azure:1.3.0
 
 # -----------------------------------------------------------------------------
 # Terraform Variables
@@ -114,7 +114,7 @@ cli:
 		-it \
 		--rm \
 		-v $(PWD):/root/terraform \
-		$(DOCKER_IMAGE) \
+		$(DOCKER_IMAGE_NAME) \
 		bash
 
 .PHONY: fmt
@@ -183,12 +183,17 @@ provision:
 		-it \
 		--rm \
 		-v $(PWD):/home/terraform \
-		--env AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
-		--env AWS_DEFAULT_OUTPUT=$(AWS_DEFAULT_OUTPUT) \
-		--env AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) \
-		--env AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
-		--env S3_BUCKET_NAME=$(S3_BUCKET_NAME) \
-		$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) \
+		--env SUBSCRIPTION_ID=$(SUBSCRIPTION_ID) \
+        --env TENANT_ID=$(SUBSCRIPTION_ID) \
+        --env CLIENT_ID=$(CLIENT_ID) \
+        --env CLIENT_SECRET=$(CLIENT_SECRET) \
+        --env RESOURCE_GROUP_NAME=$(RESOURCE_GROUP_NAME) \
+        --env STORAGE_ACCOUNT_NAME=$(STORAGE_ACCOUNT_NAME) \
+        --env SAS_TOKEN=$(SAS_TOKEN) \
+        --env ACCESS_KEY=$(ACCESS_KEY) \
+        --env CONTAINER_NAME=$(CONTAINER_NAME) \
+        --env KEY=$(KEY) \
+		$(DOCKER_IMAGE_NAME) \
 		make backend
 	@echo "$(BOLD)$(GREEN)Completed provisioning process.$(RESET)"
 
@@ -209,6 +214,6 @@ deprovision:
         --env ACCESS_KEY=$(ACCESS_KEY) \
         --env CONTAINER_NAME=$(CONTAINER_NAME) \
         --env KEY=$(KEY) \
-		$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) \
+		$(DOCKER_IMAGE_NAME) \
 		make destroy
 	@echo "$(BOLD)$(GREEN)Completed deprovisioning process.$(RESET)"

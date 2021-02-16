@@ -1,17 +1,9 @@
-# Data
-variable "custom_image_name" {
+variable "application_name" {
   default     = ""
-  description = "The name of the Image."
+  description = "Tag name for capturing application name."
   type        = string
 }
 
-variable "custom_image_resource_group_name" {
-  default     = ""
-  description = "The Name of the Resource Group where this Image exists."
-  type        = string
-}
-
-# Resources
 variable "az_vm_name" {
   default     = ""
   description = "Specifies the name of the Virtual Machine."
@@ -21,6 +13,7 @@ variable "az_vm_name" {
 variable "az_vm_password" {
   default     = ""
   description = "The password associated with the local administrator account."
+  sensitive = true
   type        = string
 }
 
@@ -33,6 +26,37 @@ variable "az_vm_size" {
 variable "az_vm_username" {
   default     = ""
   description = "Specifies the name of the local administrator account."
+  sensitive = true
+  type        = string
+}
+
+variable "cost_center" {
+  default     = ""
+  description = "Tag name for capturing cost center."
+  type        = string
+}
+
+variable "custom_image_name" {
+  default     = ""
+  description = "The name of the Image."
+  type        = string
+}
+
+variable "custom_image_resource_group_name" {
+  default     = ""
+  description = "The Name of the Resource Group where this Image exists."
+  type        = string
+}
+
+variable "department_name" {
+  default     = ""
+  description = "Tag name for capturing department name."
+  type        = string
+}
+
+variable "delivery_team_name" {
+  default     = ""
+  description = "Tag name for capturing delivery team name."
   type        = string
 }
 
@@ -54,9 +78,21 @@ variable "nic_name" {
   type        = string
 }
 
+variable "pattern_name" {
+  default     = ""
+  description = "Tag name for capturing infrastructure pattern name."
+  type        = string
+}
+
 variable "resource_group_name" {
   default     = ""
   description = "The Name which should be used for this Resource Group."
+  type        = string
+}
+
+variable "resource_owner" {
+  default     = ""
+  description = "Tag name for capturing resource owner."
   type        = string
 }
 
@@ -99,42 +135,5 @@ variable "vnet_address_space" {
 variable "vnet_name" {
   default     = ""
   description = "The name of the virtual network."
-  type        = string
-}
-
-# Tags
-variable "application_name" {
-  default     = ""
-  description = "Tag name for capturing application name."
-  type        = string
-}
-
-variable "cost_center" {
-  default     = ""
-  description = "Tag name for capturing cost center."
-  type        = string
-}
-
-variable "department_name" {
-  default     = ""
-  description = "Tag name for capturing department name."
-  type        = string
-}
-
-variable "delivery_team_name" {
-  default     = ""
-  description = "Tag name for capturing delivery team name."
-  type        = string
-}
-
-variable "pattern_name" {
-  default     = ""
-  description = "Tag name for capturing infrastructure pattern name."
-  type        = string
-}
-
-variable "resource_owner" {
-  default     = ""
-  description = "Tag name for capturing resource owner."
   type        = string
 }
