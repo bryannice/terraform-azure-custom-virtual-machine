@@ -59,33 +59,24 @@ GIT_VERSION_LONG := $(shell git describe --always --tags --long --dirty)
 # Docker Variables
 # -----------------------------------------------------------------------------
 
-DOCKER_IMAGE_NAME ?= bryannice/terraform-azure:1.3.0
+DOCKER_IMAGE_NAME ?= bryannice/alpine-terraform-azure:1.3.0
 
 # -----------------------------------------------------------------------------
 # Terraform Variables
 # -----------------------------------------------------------------------------
-
-ifdef SUBSCRIPTION_OWNER
-resource_group_name := $(if strlen($(subst -,,$(subst _,,$(SUBSCRIPTION_OWNER)-backend)))>25,$(shell echo ${SUBSCRIPTION_OWNER} | head -c 13)-backend,$(SUBSCRIPTION_OWNER)-backend)
-else
-resource_group_name := $(GIT_REPOSITORY_NAME)
-endif
-
-.EXPORT_ALL_VARIABLES:
-TF_VAR_location ?= West US 2
-TF_VAR_resource_group_name := $(resource_group_name)
-TF_VAR_storage_account_name := $(subst -,,$(subst _,,$(TF_VAR_resource_group_name)))
-TF_VAR_storage_container_names := terraform-state-files
+backend_resource_group_name ?= $(BACKEND_RESOURCE_GROUP_NAME)
+backend_storage_account_name ?= $(subst -,,$(subst _,,$(BACKEND_STORAGE_ACCOUNT_NAME)))
+backend_storage_container_name ?= terraform-state-files
 
 SUBSCRIPTION_ID := $(ifndef SUBSCRIPTION_ID,"","subscription_id = \"$(SUBSCRIPTION_ID)\"" endif)
 TENANT_ID := $(ifndef TENANT_ID,"","tenant_id = \"$(TENANT_ID)\"" endif)
 CLIENT_ID := $(ifndef CLIENT_ID,"","client_id = \"$(CLIENT_ID)\"" endif)
 CLIENT_SECRET := $(ifndef CLIENT_SECRET,"","client_secret = \"$(CLIENT_SECRET)\"" endif)
-RESOURCE_GROUP_NAME := "resource_group_name = \"$(TF_VAR_resource_group_name)\""
-STORAGE_ACCOUNT_NAME := "storage_account_name = \"$(TF_VAR_storage_account_name)\""
+RESOURCE_GROUP_NAME := "resource_group_name = \"$(backend_resource_group_name)\""
+STORAGE_ACCOUNT_NAME := "storage_account_name = \"$(backend_storage_account_name)\""
 SAS_TOKEN := $(ifndef TF_VAR_SAS_TOKEN,"","sas_token = \"$(TF_VAR_SAS_TOKEN)\"" endif)
 ACCESS_KEY := $(ifndef TF_VAR_ACCESS_KEY,"","access_key = \"$(TF_VAR_ACCESS_KEY)\"" endif)
-CONTAINER_NAME := "container_name = \"$(TF_VAR_storage_container_names)\""
+CONTAINER_NAME := "container_name = \"$(backend_storage_container_name)\""
 KEY := "key = \"$(GIT_REPOSITORY_NAME)/$(TF_VAR_resource_group_name).tfstate\""
 
 # -----------------------------------------------------------------------------
@@ -184,17 +175,53 @@ provision:
 		--rm \
 		-v $(PWD):/home/terraform \
 		--env SUBSCRIPTION_ID=$(SUBSCRIPTION_ID) \
-        --env TENANT_ID=$(SUBSCRIPTION_ID) \
-        --env CLIENT_ID=$(CLIENT_ID) \
-        --env CLIENT_SECRET=$(CLIENT_SECRET) \
-        --env RESOURCE_GROUP_NAME=$(RESOURCE_GROUP_NAME) \
-        --env STORAGE_ACCOUNT_NAME=$(STORAGE_ACCOUNT_NAME) \
-        --env SAS_TOKEN=$(SAS_TOKEN) \
-        --env ACCESS_KEY=$(ACCESS_KEY) \
-        --env CONTAINER_NAME=$(CONTAINER_NAME) \
-        --env KEY=$(KEY) \
+		--env TENANT_ID=$(SUBSCRIPTION_ID) \
+		--env CLIENT_ID=$(CLIENT_ID) \
+		--env CLIENT_SECRET=$(CLIENT_SECRET) \
+		--env RESOURCE_GROUP_NAME=$(RESOURCE_GROUP_NAME) \
+		--env STORAGE_ACCOUNT_NAME=$(STORAGE_ACCOUNT_NAME) \
+		--env SAS_TOKEN=$(SAS_TOKEN) \
+		--env ACCESS_KEY=$(ACCESS_KEY) \
+		--env CONTAINER_NAME=$(CONTAINER_NAME) \
+		--env KEY=$(KEY) \
+		--env BACKEND_RESOURCE_GROUP_NAME=$(BACKEND_RESOURCE_GROUP_NAME) \
+		--env BACKEND_STORAGE_ACCOUNT_NAME=$(BACKEND_STORAGE_ACCOUNT_NAME) \
+		--env TF_VAR_allocation_method=$(TF_VAR_allocation_method) \
+		--env TF_VAR_application_name=$(TF_VAR_application_name) \
+		--env TF_VAR_az_vm_name=$(TF_VAR_az_vm_name) \
+		--env TF_VAR_az_vm_password=$(TF_VAR_az_vm_password) \
+		--env TF_VAR_az_vm_size=$(TF_VAR_az_vm_size) \
+		--env TF_VAR_az_vm_username=$(TF_VAR_az_vm_username) \
+		--env TF_VAR_cost_center=$(TF_VAR_cost_center) \
+		--env TF_VAR_custom_image_name=$(TF_VAR_custom_image_name) \
+		--env TF_VAR_custom_image_resource_group_name=$(TF_VAR_custom_image_resource_group_name) \
+		--env TF_VAR_department_name=$(TF_VAR_department_name) \
+		--env TF_VAR_delivery_team_name=$(TF_VAR_delivery_team_name) \
+		--env TF_VAR_location=$(TF_VAR_location) \
+		--env TF_VAR_managed_disk_type=$(TF_VAR_managed_disk_type) \
+		--env TF_VAR_nic_name=$(TF_VAR_nic_name) \
+		--env TF_VAR_nic_private_ip_address_allocation=$(TF_VAR_nic_private_ip_address_allocation) \
+		--env TF_VAR_nsg_name=$(TF_VAR_nsg_name) \
+		--env TF_VAR_nsg_security_rule_access=$(TF_VAR_nsg_security_rule_access) \
+		--env TF_VAR_nsg_security_rule_direction=$(TF_VAR_nsg_security_rule_direction) \
+		--env TF_VAR_nsg_security_rule_destination_address_prefix=$(TF_VAR_nsg_security_rule_destination_address_prefix) \
+		--env TF_VAR_nsg_security_rule_destination_port_range=$(TF_VAR_nsg_security_rule_destination_port_range) \
+		--env TF_VAR_nsg_security_rule_name=$(TF_VAR_nsg_security_rule_name) \
+		--env TF_VAR_nsg_security_rule_priority=$(TF_VAR_nsg_security_rule_priority) \
+		--env TF_VAR_nsg_security_rule_protocol=$(TF_VAR_nsg_security_rule_protocol) \
+		--env TF_VAR_nsg_security_rule_source_address_prefix=$(TF_VAR_nsg_security_rule_source_address_prefix) \
+		--env TF_VAR_nsg_security_rule_source_port_range=$(TF_VAR_nsg_security_rule_source_port_range) \
+		--env TF_VAR_pattern_name=$(TF_VAR_pattern_name) \
+		--env TF_VAR_public_ip_name=$(TF_VAR_public_ip_name) \
+		--env TF_VAR_resource_owner=$(TF_VAR_resource_owner) \
+		--env TF_VAR_resource_group_name=$(TF_VAR_resource_group_name) \
+		--env TF_VAR_storage_os_disk_create_option=$(TF_VAR_storage_os_disk_create_option) \
+		--env TF_VAR_subnet_address_prefixes=$(TF_VAR_subnet_address_prefixes) \
+		--env TF_VAR_subnet_name=$(TF_VAR_subnet_name) \
+		--env TF_VAR_vnet_address_space=$(TF_VAR_vnet_address_space) \
+		--env TF_VAR_vnet_name=$(TF_VAR_vnet_name) \
 		$(DOCKER_IMAGE_NAME) \
-		make backend
+		make apply
 	@echo "$(BOLD)$(GREEN)Completed provisioning process.$(RESET)"
 
 .PHONY: deprovision
@@ -205,15 +232,51 @@ deprovision:
 		--rm \
 		-v $(PWD):/home/terraform \
 		--env SUBSCRIPTION_ID=$(SUBSCRIPTION_ID) \
-        --env TENANT_ID=$(SUBSCRIPTION_ID) \
-        --env CLIENT_ID=$(CLIENT_ID) \
-        --env CLIENT_SECRET=$(CLIENT_SECRET) \
-        --env RESOURCE_GROUP_NAME=$(RESOURCE_GROUP_NAME) \
-        --env STORAGE_ACCOUNT_NAME=$(STORAGE_ACCOUNT_NAME) \
-        --env SAS_TOKEN=$(SAS_TOKEN) \
-        --env ACCESS_KEY=$(ACCESS_KEY) \
-        --env CONTAINER_NAME=$(CONTAINER_NAME) \
-        --env KEY=$(KEY) \
+		--env TENANT_ID=$(SUBSCRIPTION_ID) \
+		--env CLIENT_ID=$(CLIENT_ID) \
+		--env CLIENT_SECRET=$(CLIENT_SECRET) \
+		--env RESOURCE_GROUP_NAME=$(RESOURCE_GROUP_NAME) \
+		--env STORAGE_ACCOUNT_NAME=$(STORAGE_ACCOUNT_NAME) \
+		--env SAS_TOKEN=$(SAS_TOKEN) \
+		--env ACCESS_KEY=$(ACCESS_KEY) \
+		--env CONTAINER_NAME=$(CONTAINER_NAME) \
+		--env KEY=$(KEY) \
+		--env BACKEND_RESOURCE_GROUP_NAME=$(BACKEND_RESOURCE_GROUP_NAME) \
+		--env BACKEND_STORAGE_ACCOUNT_NAME=$(BACKEND_STORAGE_ACCOUNT_NAME) \
+		--env TF_VAR_allocation_method=$(TF_VAR_allocation_method) \
+		--env TF_VAR_application_name=$(TF_VAR_application_name) \
+		--env TF_VAR_az_vm_name=$(TF_VAR_az_vm_name) \
+		--env TF_VAR_az_vm_password=$(TF_VAR_az_vm_password) \
+		--env TF_VAR_az_vm_size=$(TF_VAR_az_vm_size) \
+		--env TF_VAR_az_vm_username=$(TF_VAR_az_vm_username) \
+		--env TF_VAR_cost_center=$(TF_VAR_cost_center) \
+		--env TF_VAR_custom_image_name=$(TF_VAR_custom_image_name) \
+		--env TF_VAR_custom_image_resource_group_name=$(TF_VAR_custom_image_resource_group_name) \
+		--env TF_VAR_department_name=$(TF_VAR_department_name) \
+		--env TF_VAR_delivery_team_name=$(TF_VAR_delivery_team_name) \
+		--env TF_VAR_location=$(TF_VAR_location) \
+		--env TF_VAR_managed_disk_type=$(TF_VAR_managed_disk_type) \
+		--env TF_VAR_nic_name=$(TF_VAR_nic_name) \
+		--env TF_VAR_nic_private_ip_address_allocation=$(TF_VAR_nic_private_ip_address_allocation) \
+		--env TF_VAR_nsg_name=$(TF_VAR_nsg_name) \
+		--env TF_VAR_nsg_security_rule_access=$(TF_VAR_nsg_security_rule_access) \
+		--env TF_VAR_nsg_security_rule_direction=$(TF_VAR_nsg_security_rule_direction) \
+		--env TF_VAR_nsg_security_rule_destination_address_prefix=$(TF_VAR_nsg_security_rule_destination_address_prefix) \
+		--env TF_VAR_nsg_security_rule_destination_port_range=$(TF_VAR_nsg_security_rule_destination_port_range) \
+		--env TF_VAR_nsg_security_rule_name=$(TF_VAR_nsg_security_rule_name) \
+		--env TF_VAR_nsg_security_rule_priority=$(TF_VAR_nsg_security_rule_priority) \
+		--env TF_VAR_nsg_security_rule_protocol=$(TF_VAR_nsg_security_rule_protocol) \
+		--env TF_VAR_nsg_security_rule_source_address_prefix=$(TF_VAR_nsg_security_rule_source_address_prefix) \
+		--env TF_VAR_nsg_security_rule_source_port_range=$(TF_VAR_nsg_security_rule_source_port_range) \
+		--env TF_VAR_pattern_name=$(TF_VAR_pattern_name) \
+		--env TF_VAR_public_ip_name=$(TF_VAR_public_ip_name) \
+		--env TF_VAR_resource_owner=$(TF_VAR_resource_owner) \
+		--env TF_VAR_resource_group_name=$(TF_VAR_resource_group_name) \
+		--env TF_VAR_storage_os_disk_create_option=$(TF_VAR_storage_os_disk_create_option) \
+		--env TF_VAR_subnet_address_prefixes=$(TF_VAR_subnet_address_prefixes) \
+		--env TF_VAR_subnet_name=$(TF_VAR_subnet_name) \
+		--env TF_VAR_vnet_address_space=$(TF_VAR_vnet_address_space) \
+		--env TF_VAR_vnet_name=$(TF_VAR_vnet_name) \
 		$(DOCKER_IMAGE_NAME) \
 		make destroy
 	@echo "$(BOLD)$(GREEN)Completed deprovisioning process.$(RESET)"
